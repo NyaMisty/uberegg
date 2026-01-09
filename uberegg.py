@@ -5,7 +5,6 @@ from distutils import log
 
 from setuptools.command.bdist_egg import bdist_egg
 
-
 class bdist_uberegg(bdist_egg):
     description = "create an uber-egg (egg with dependencies) distribution"
     user_options = bdist_egg.user_options + [
@@ -24,6 +23,10 @@ class bdist_uberegg(bdist_egg):
         if self.requirements is None:
             self.requirements = 'requirements.txt'
         super().finalize_options()
+
+    def get_ext_outputs(self):
+        all_outputs, ext_outputs = super().get_ext_outputs()
+        return all_outputs, all_outputs
 
     def run(self):
         if self.requirements and os.path.exists(self.requirements):
