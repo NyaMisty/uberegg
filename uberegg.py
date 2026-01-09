@@ -25,7 +25,15 @@ class bdist_uberegg(bdist_egg):
         super().finalize_options()
 
     def get_ext_outputs(self):
-        all_outputs, ext_outputs = super().get_ext_outputs()
+        for base, dirs, files in os.walk(self.bdist_dir):
+            if any(base.endswith(c) for c in ["__pycache__", ".dist-info", ]):
+                continue
+            if '__init__.py' not in files:
+                # Fix zipimport error: https://github.com/python/cpython/issues/121111
+                with open(os.path.join(base, '__init__.py'), 'w'):
+                    pass # create empty __init__.py file
+
+        all_outputs, ext_outputs = super().get_ext_outputs()        
         return all_outputs, all_outputs
 
     def run(self):
