@@ -4,6 +4,19 @@ import sys
 from distutils import log
 
 from setuptools.command.bdist_egg import bdist_egg
+import setuptools.command.bdist_egg
+import re
+
+old_write_stub = setuptools.command.bdist_egg.write_stub
+def new_write_stub(resource, pyfile) -> None:
+    print(f'Patched write_stub called for {resource} -> {pyfile}')
+    old_write_stub(resource, pyfile)
+    with open(pyfile, 'r') as f:
+        content = f.read()
+    content = content.replace(r'spec.loader.exec_module(mod)', r'sys.modules[__name__] = mod; spec.loader.exec_module(mod)')
+    with open(pyfile, 'w') as f:
+        f.write(content)
+setuptools.command.bdist_egg.write_stub = new_write_stub
 
 class bdist_uberegg(bdist_egg):
     description = "create an uber-egg (egg with dependencies) distribution"
